@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>Foruth Research & Penetration Testing</title>
+    <meta name="description"
+        content="Security research blog of Pravin Mohite — Penetration Tester and Lab Developer specializing in vulnerability research, CTF-style lab creation, and offensive security techniques.">
+    <meta name="author" content="Pravin Mohite">
+    <link rel="canonical" href="https://foruth.github.io/">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Foruth Research & Penetration Testing">
+    <meta property="og:description"
+        content="Security research blog of Pravin Mohite — Penetration Tester and Lab Developer specializing in vulnerability research, CTF-style lab creation, and offensive security techniques.">
+    <meta property="og:url" content="https://foruth.github.io/">
+    <meta property="og:image" content="https://foruth.github.io/img/og-home.jpg">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Foruth Research & Penetration Testing">
+    <meta name="twitter:description"
+        content="Security research blog of Pravin Mohite — Penetration Tester and Lab Developer specializing in vulnerability research and offensive security.">
+
+    <!-- Fonts: Inter (UI) + Merriweather (Headings) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS CDN with custom config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        serif: ['Merriweather', 'Georgia', 'Times New Roman', 'serif'],
+                    },
+                    colors: {
+                        // Custom color palette
+                        accent: {
+                            DEFAULT: '#6366F1',
+                            hover: '#4F46E5',
+                            light: '#EEF2FF',
+                        },
+                    },
+                    typography: {
+                        DEFAULT: {
+                            css: {
+                                maxWidth: '720px',
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/custom.css">
+
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="Security Research RSS Feed" href="rss.xml">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+</head>
+
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+    <!-- Skip to main content (Accessibility) -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- ============================================
+       HEADER / NAVIGATION
+  ============================================ -->
+    <header
+        class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Logo -->
+                <a href="index.html"
+                    class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                    <img src="img/logo.png" alt="Foruth Logo" class="w-8 h-8">
+                    <span>Foruth</span>
+                </a>
+
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="index.html"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Home</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">About</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Archive</a>
+                    <a href="rss.xml"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">RSS</a>
+                </nav>
+
+                <!-- Search & Theme Toggle -->
+                <div class="flex items-center gap-2">
+                    <button id="search-toggle" class="theme-toggle" aria-label="Search" title="Search (Ctrl+K)">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"
+                        title="Toggle dark mode">
+                        <svg class="icon-sun w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <svg class="icon-moon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================
+       MAIN CONTENT
+  ============================================ -->
+    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:pl-8 lg:pr-0 py-12">
+
+        <!-- Page Header -->
+        <div class="mb-12">
+            <h1 class="font-serif text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+                Pentesting Insights
+            </h1>
+            <p class="text-xl text-slate-600 dark:text-slate-400 max-w-2xl">
+                Insights on penetration testing, CTF challenges, Hands-on breakdowns of attack paths.
+            </p>
+        </div>
+
+        <!-- Two-column layout: Post List + Sidebar -->
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_400px] gap-12">
+
+            <!-- Post List -->
+            <div class="space-y-8">
+
+                <!-- Post Card - Privilege Escalation -->
+                <article class="post-card">
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="tag-chip">Windows Security</span>
+                        <span class="tag-chip">Privilege Escalation</span>
+                        <span class="tag-chip">Service Permissions</span>
+                    </div>
+                    <h2 class="post-card__title">
+                        <a href="posts/Windows Privilege Escalation Weak Service Permissions.html">Windows Privilege
+                            Escalation via Weak Service Permissions</a>
+                    </h2>
+                    <p class="post-card__excerpt">
+                        Exploiting weak ACLs and service permissions to escalate from standard user to SYSTEM on
+                        Windows.
+                    </p>
+                    <div class="post-card__meta">
+                        <span>December 9, 2025</span>
+                        <span>•</span>
+                        <span>15 min read</span>
+                    </div>
+                </article>
+
+                <!-- Post Card - UAC Bypass -->
+                <article class="post-card">
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="tag-chip">Windows Security</span>
+                        <span class="tag-chip">UAC Bypass</span>
+                        <span class="tag-chip">DLL Hijacking</span>
+                    </div>
+                    <h2 class="post-card__title">
+                        <a href="posts/Windows UAC Bypass DLL Hijacking.html">Windows UAC Bypass via DLL Hijacking
+                            Walkthrough</a>
+                    </h2>
+                    <p class="post-card__excerpt">
+                        Exploiting auto-elevating binaries and missing DLLs to gain elevated privileges on Windows 10.
+                    </p>
+                    <div class="post-card__meta">
+                        <span>December 8, 2025</span>
+                        <span>•</span>
+                        <span>10 min read</span>
+                    </div>
+                </article>
+
+                <!-- Post Card 2 
+                <article class="post-card">
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <a href="#" class="tag-chip">Windows Security</a>
+                        <a href="#" class="tag-chip">Privilege Escalation</a>
+                    </div>
+                    <h2 class="post-card__title">
+                        <a href="posts/Windows Group Abuse Part 3.html">Windows Group Abuse — Part 3</a>
+                    </h2>
+                    <p class="post-card__excerpt">
+                        Server Operators, Hyper-V Admins & Certificate Abuse
+                    </p>
+                    <div class="post-card__meta">
+                        <span>December 7, 2025</span>
+                        <span>•</span>
+                        <span>10 min read</span>
+                    </div>
+                </article> -->
+
+                <!-- Post Card 2 
+                <article class="post-card">
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <a href="#" class="tag-chip">Windows Security</a>
+                        <a href="#" class="tag-chip">AD Abuse</a>
+                    </div>
+                    <h2 class="post-card__title">
+                        <a href="posts/Windows Group Abuse Part 2.html">Windows Group Abuse — Part 2 </a>
+                    </h2>
+                    <p class="post-card__excerpt">
+                        Print Operators, Hyper-V Administrators & Server Operators </p>
+                    <div class="post-card__meta">
+                        <span>February 20, 2024</span>
+                        <span>•</span>
+                        <span>8 min read</span>
+                    </div>
+                </article> -->
+
+                <!-- Post Card 3 
+                <article class="post-card">
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <a href="#" class="tag-chip">Windows Group Abuse</a>
+                        <a href="#" class="tag-chip">Privilege Escalation</a>
+                    </div>
+                    <h2 class="post-card__title">
+                        <a href="posts/Windows Group Abuse Part 1.html">Windows Group Abuse — Part 1 </a>
+                    </h2>
+                    <p class="post-card__excerpt">
+                        Backup Operators, Event Log Readers & DnsAdmins
+                    </p>
+                    <div class="post-card__meta">
+                        <span>January 15, 2024</span>
+                        <span>•</span>
+                        <span>12 min read</span>
+                    </div>
+                </article> -->
+
+                <!-- Pagination -->
+                <nav class="flex items-center justify-center gap-2 pt-8" aria-label="Pagination">
+                    <a href="#"
+                        class="px-4 py-2 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-lg cursor-not-allowed opacity-50"
+                        aria-disabled="true">
+                        ← Previous
+                    </a>
+                    <span class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg">1</span>
+                    <a href="#"
+                        class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">2</a>
+                    <a href="#"
+                        class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">3</a>
+                    <a href="#"
+                        class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        Next →
+                    </a>
+                </nav>
+
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar-stack">
+
+                <!-- Author Card -->
+                <a href="https://www.linkedin.com/in/encoded1/" target="_blank" rel="noopener noreferrer"
+                    class="author-box-link">
+                    <div class="author-box">
+                        <img src="img/avatar.png" alt="Pravin Mohite" class="author-box__avatar" width="72" height="72">
+                        <div class="author-box__content">
+                            <h2 class="author-box__name">Pravin Mohite</h2>
+                            <p class="author-box__role">Penetration Tester & Cybersecurity Engineer</p>
+                            <p class="author-box__bio">Security Researcher & Lab Developer. Preparing for CPTS & OSCP.
+                                Specializing in vulnerability research, CTF-style lab creation, and offensive security.
+                            </p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Popular Tags -->
+                <div
+                    class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">
+                        Areas of Interest</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="tag-chip">Penetration Testing</span>
+                        <span class="tag-chip">Active Directory</span>
+                        <span class="tag-chip">CTF</span>
+                        <span class="tag-chip">Exploit Dev</span>
+                        <span class="tag-chip">Web Security</span>
+                        <span class="tag-chip">Red Team</span>
+                        <span class="tag-chip">OSCP</span>
+                    </div>
+                </div>
+
+                <!-- Visitor Counter -->
+                <div
+                    class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">
+                        Visitors</h3>
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                            </path>
+                        </svg>
+                        <span class="js-visitor-count text-2xl font-bold text-slate-900 dark:text-white">--</span>
+                        <span class="text-sm text-slate-500 dark:text-slate-400">views</span>
+                    </div>
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+    <!-- ============================================
+       FOOTER
+  ============================================ -->
+    <footer class="mt-16 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+
+            <!-- Links & Social -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-sm">
+                <nav class="flex flex-wrap items-center justify-center gap-4 text-slate-600 dark:text-slate-400">
+                    <a href="index.html"
+                        class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Archive</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="rss.xml" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">RSS
+                        Feed</a>
+                </nav>
+
+                <div class="flex items-center justify-center gap-4 text-slate-500">
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="GitHub">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="Twitter">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="LinkedIn">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-slate-200 dark:border-slate-800 pt-4 text-center text-xs text-slate-500">
+                <p> 2025 Pravin Mohite. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Modal -->
+    <div id="search-modal" class="search-modal hidden" role="dialog" aria-modal="true" aria-labelledby="search-title">
+        <div class="search-modal__backdrop"></div>
+        <div class="search-modal__container">
+            <div class="search-modal__content">
+                <div class="search-modal__header">
+                    <div class="search-modal__input-wrapper">
+                        <svg class="search-modal__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" id="search-input" class="search-modal__input" placeholder="Search posts..."
+                            autocomplete="off" autofocus>
+                        <kbd class="search-modal__kbd">ESC</kbd>
+                    </div>
+                </div>
+                <div id="search-results" class="search-modal__results">
+                    <p class="search-modal__hint">Type to search posts by title, content, or tags...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>
