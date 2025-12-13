@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- SEO Meta Tags -->
-    <title>The Script: A Minimalist Upload + Download Server | Foruth</title>
+    <title>A Minimalist Upload + Download Server | Foruth</title>
     <meta name="description" content="Everyone knows how to download files using python3 -m http.server 8000. It’s incredibly simple — no extra setup, no hassle. You start the HTTP server,...">
     <meta name="author" content="Pravin Mohite">
     <link rel="canonical" href="https://foruth.github.io/posts/Windows%20UAC%20Bypass%20DLL%20Hijacking.html">
@@ -285,22 +285,16 @@ if __name__ == "__main__":
 </ul>
 <p>Start the server:</p>
 <p>from <code>linux</code></p>
-<pre><code>python3 upload_server.py --port 8000
-
-</code></pre>
+<pre><code>python3 upload_server.py --port 8000</code></pre>
 <p>Or point it at a different directory:</p>
-<pre><code>python3 upload_server.py --port 8000 --dir /path/to/share
-
-</code></pre>
+<pre><code>python3 upload_server.py --port 8000 --dir /path/to/share</code></pre>
 <img src="image1.png" alt="image.png" class="w-full h-auto rounded-lg my-4">
 <h4>on <code>Windows</code></h4>
 <ul>
 <li>If you have <code>RDP</code> then,</li>
 </ul>
 <p>Open the server in a browser:</p>
-<pre><code>http://&lt;your-ip&gt;:8000/
-
-</code></pre>
+<pre><code>http://&lt;your-ip&gt;:8000/</code></pre>
 <p>You’ll see a simple upload form. Any uploaded file goes into the <code>uploads/</code> folder inside whatever directory you launched the script from.</p>
 <p>Clean, minimal, and effective.</p>
 <ul>
@@ -417,3 +411,4 @@ if __name__ == "__main__":
 
 
 </html>
+
