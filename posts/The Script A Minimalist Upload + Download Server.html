@@ -218,7 +218,7 @@
 <h2>The Script: A Minimalist Upload + Download Server</h2>
 <ul>
 <li>Save this as</li>
-<li><strong><code>upload-server.py</code></strong>:</li>
+<li><strong><code class="language-python">upload-server.py</code></strong>:</li>
 </ul>
 <pre><code class="language-python">#!/usr/bin/env python3
 import http.server
@@ -281,20 +281,20 @@ if __name__ == "__main__":
 <hr>
 <h2>How to Use It</h2>
 <ul>
-<li>For This example we are Uploading file from <code>Windows</code> to <code>linux</code></li>
+<li>For This example we are Uploading file from <code class="language-python">Windows</code> to <code class="language-python">linux</code></li>
 </ul>
 <p>Start the server:</p>
-<p>from <code>linux</code></p>
-<pre><code>python3 upload_server.py --port 8000</code></pre>
+<p>from <code class="language-python">linux</code></p>
+<pre><codeclass="language-python">python3 upload_server.py --port 8000</code></pre>
 <p>Or point it at a different directory:</p>
-<pre><code>python3 upload_server.py --port 8000 --dir /path/to/share</code></pre>
+<pre><code class="language-python">python3 upload_server.py --port 8000 --dir /path/to/share</code></pre>
 <img src="image1.png" alt="image.png" class="w-full h-auto rounded-lg my-4">
 <h4>on <code>Windows</code></h4>
 <ul>
 <li>If you have <code>RDP</code> then,</li>
 </ul>
 <p>Open the server in a browser:</p>
-<pre><code>http://&lt;your-ip&gt;:8000/</code></pre>
+<pre><code class="language-python">http://&lt;your-ip&gt;:8000/</code></pre>
 <p>You’ll see a simple upload form. Any uploaded file goes into the <code>uploads/</code> folder inside whatever directory you launched the script from.</p>
 <p>Clean, minimal, and effective.</p>
 <ul>
@@ -411,5 +411,6 @@ if __name__ == "__main__":
 
 
 </html>
+
 
 
