@@ -151,29 +151,27 @@
         </div>
 
         <!-- Single-column focused feed -->
+        <h2 class="font-serif text-2xl font-bold text-slate-900 dark:text-white mb-6">Latest Blog</h2>
         <div class="space-y-8">
             <!-- First Row: Post Card + Author Box -->
             <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
                 
-                <!-- Post Card - Privilege Escalation -->
+                <!-- Post Card - Upload Server (Featured) -->
                 <article class="post-card h-full">
                     <div class="flex flex-wrap gap-2 mb-3">
                         <span class="tag-chip">Windows Security</span>
                         <span class="tag-chip">Privilege Escalation</span>
-                        <span class="tag-chip">Service Permissions</span>
                     </div>
                     <h2 class="post-card__title">
-                        <a href="posts/Windows Privilege Escalation Weak Service Permissions.html">Windows Privilege
-                            Escalation via Weak Service Permissions</a>
+                        <a href="posts/The Script A Minimalist Upload + Download Server.html">A Minimalist Upload + Download Server: 'python3 upload_server.py'</a>
                     </h2>
                     <p class="post-card__excerpt">
-                        Exploiting weak ACLs and service permissions to escalate from standard user to SYSTEM on
-                        Windows.
+                        Everyone knows how to download files using `python3 -m http.server 8000`. It’s incredibly simple no extra setup, no hassle.But uploading? Oh, that’s where things suddenly get awkward.
                     </p>
                     <div class="post-card__meta">
-                        <span>December 9, 2025</span>
+                        <span>December 13, 2025</span>
                         <span>•</span>
-                        <span>15 min read</span>
+                        <span>5 min read</span>
                     </div>
                 </article>
 
@@ -195,6 +193,28 @@
                 
             </div>
 
+                <!-- Post Card - Privilege Escalation -->
+                <article class="post-card">
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="tag-chip">Windows Security</span>
+                        <span class="tag-chip">Privilege Escalation</span>
+                        <span class="tag-chip">Service Permissions</span>
+                    </div>
+                    <h2 class="post-card__title">
+                        <a href="posts/Windows Privilege Escalation Weak Service Permissions.html">Windows Privilege
+                            Escalation via Weak Service Permissions</a>
+                    </h2>
+                    <p class="post-card__excerpt">
+                        Exploiting weak ACLs and service permissions to escalate from standard user to SYSTEM on
+                        Windows.
+                    </p>
+                    <div class="post-card__meta">
+                        <span>December 9, 2025</span>
+                        <span>•</span>
+                        <span>15 min read</span>
+                    </div>
+                </article>
+
                 <!-- Post Card - UAC Bypass -->
                 <article class="post-card">
                     <div class="flex flex-wrap gap-2 mb-3">
@@ -213,25 +233,6 @@
                         <span>December 8, 2025</span>
                         <span>•</span>
                         <span>10 min read</span>
-                    </div>
-                </article>
-
-                <!-- Post Card 2 -->
-                <article class="post-card">
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        <a href="#" class="tag-chip">Windows Security</a>
-                        <a href="#" class="tag-chip">Privilege Escalation</a>
-                    </div>
-                    <h2 class="post-card__title">
-                        <a href="posts/The Script A Minimalist Upload + Download Server.html">A Minimalist Upload + Download Server: 'python3 upload_server.py'</a>
-                    </h2>
-                    <p class="post-card__excerpt">
-                        Everyone knows how to download files using `python3 -m http.server 8000`. It’s incredibly simple no extra setup, no hassle.But uploading? Oh, that’s where things suddenly get awkward.
-                    </p>
-                    <div class="post-card__meta">
-                        <span>December 13, 2025</span>
-                        <span>•</span>
-                        <span>5 min read</span>
                     </div>
                 </article> 
 
