@@ -514,6 +514,65 @@
     };
 
     /* ============================================
+       CODE COPY BUTTONS
+    ============================================ */
+
+    const CodeCopyButtons = {
+        init() {
+            document.querySelectorAll('pre').forEach(pre => {
+                // Wrap pre in a relative container if not already
+                if (!pre.parentElement.classList.contains('code-block-wrapper')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'code-block-wrapper';
+                    pre.parentNode.insertBefore(wrapper, pre);
+                    wrapper.appendChild(pre);
+                }
+
+                // Create the copy button
+                const btn = document.createElement('button');
+                btn.className = 'code-copy-btn';
+                btn.setAttribute('aria-label', 'Copy code');
+                btn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>Copy</span>
+                `;
+
+                btn.addEventListener('click', async () => {
+                    const code = pre.querySelector('code');
+                    const text = code ? code.innerText : pre.innerText;
+
+                    try {
+                        await navigator.clipboard.writeText(text);
+                    } catch {
+                        // Fallback for older browsers
+                        const ta = document.createElement('textarea');
+                        ta.value = text;
+                        ta.style.position = 'fixed';
+                        ta.style.opacity = '0';
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(ta);
+                    }
+
+                    // Show Copied! state
+                    btn.classList.add('copied');
+                    btn.querySelector('span').textContent = 'Copied!';
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.querySelector('span').textContent = 'Copy';
+                    }, 2000);
+                });
+
+                pre.parentElement.appendChild(btn);
+            });
+        }
+    };
+
+    /* ============================================
        INITIALIZE
     ============================================ */
 
@@ -552,6 +611,7 @@
         LazyImages.init();
         PostCards.init();
         VisitorCounter.init();
+        CodeCopyButtons.init();
     });
 
 })();

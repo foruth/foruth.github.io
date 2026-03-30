@@ -107,12 +107,6 @@
                 <nav class="hidden md:flex items-center gap-8">
                     <a href="index.html"
                         class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Home</a>
-                    <a href="#"
-                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">About</a>
-                    <a href="#"
-                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">Archive</a>
-                <!--    <a href="rss.xml"
-                        class="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors">RSS</a> -->
                 </nav>
 
                 <!-- Search & Theme Toggle -->
@@ -144,9 +138,9 @@
     <!-- ============================================
        MAIN CONTENT
   ============================================ -->
-    <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:pl-8 lg:pr-0 py-12">
+    <main id="main-content" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        <!-- Page Header -->
+        <!-- Page Header (Restored) -->
         <div class="mb-12">
             <h1 class="font-serif text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
                 Pentesting Insights
@@ -156,14 +150,13 @@
             </p>
         </div>
 
-        <!-- Two-column layout: Post List + Sidebar -->
-        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_400px] gap-12">
-
-            <!-- Post List -->
-            <div class="space-y-8">
-
+        <!-- Single-column focused feed -->
+        <div class="space-y-8">
+            <!-- First Row: Post Card + Author Box -->
+            <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
+                
                 <!-- Post Card - Privilege Escalation -->
-                <article class="post-card">
+                <article class="post-card h-full">
                     <div class="flex flex-wrap gap-2 mb-3">
                         <span class="tag-chip">Windows Security</span>
                         <span class="tag-chip">Privilege Escalation</span>
@@ -183,6 +176,24 @@
                         <span>15 min read</span>
                     </div>
                 </article>
+
+                <!-- Author Box (Only for first card) -->
+                <aside class="sidebar-stack h-full">
+                    <a href="https://www.linkedin.com/in/encoded1/" target="_blank" rel="noopener noreferrer" class="author-box-link h-full block">
+                        <div class="author-box h-full flex-col justify-center text-center">
+                            <img src="img/avatar.png" alt="Pravin Mohite" class="author-box__avatar mx-auto" width="72" height="72">
+                            <div class="author-box__content">
+                                <h2 class="author-box__name">Pravin Mohite</h2>
+                                <p class="author-box__role">Penetration Tester & Cybersecurity Engineer</p>
+                                <p class="author-box__bio mt-2">Security Researcher & Lab Developer. Preparing for CPTS & OSCP.
+                                    Specializing in vulnerability research, CTF-style lab creation, and offensive security.
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </aside>
+                
+            </div>
 
                 <!-- Post Card - UAC Bypass -->
                 <article class="post-card">
@@ -279,55 +290,6 @@
                     </a>
                 </nav>
 
-            </div>
-
-            <!-- Sidebar -->
-            <aside class="sidebar-stack">
-
-                <!-- Author Card -->
-                <a href="https://www.linkedin.com/in/encoded1/" target="_blank" rel="noopener noreferrer"
-                    class="author-box-link">
-                    <div class="author-box">
-                        <img src="img/avatar.png" alt="Pravin Mohite" class="author-box__avatar" width="72" height="72">
-                        <div class="author-box__content">
-                            <h2 class="author-box__name">Pravin Mohite</h2>
-                            <p class="author-box__role">Penetration Tester & Cybersecurity Engineer</p>
-                            <p class="author-box__bio">Security Researcher & Lab Developer. Preparing for CPTS & OSCP.
-                                Specializing in vulnerability research, CTF-style lab creation, and offensive security.
-                            </p>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Popular Tags -->
-                <div
-                    class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">
-                        Areas of Interest</h3>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="tag-chip">Penetration Testing</span>
-                        <span class="tag-chip">Active Directory</span>
-                        <span class="tag-chip">CTF</span>
-                        <span class="tag-chip">Exploit Dev</span>
-                        <span class="tag-chip">Web Security</span>
-                        <span class="tag-chip">Red Team</span>
-                        <span class="tag-chip">OSCP</span>
-                    </div>
-                </div>
-
-                <!-- Visitor Counter -->
-                <div
-                    class="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                    <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">
-                        </h3>
-                    <div class="flex items-center gap-3">
-                        <img src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fforuth.github.io&countColor=%236366F1&style=flat"
-                            alt="Visitor Count" class="h-6">
-                    </div>
-                </div>
-
-            </aside>
-
         </div>
 
     </main>
@@ -343,13 +305,6 @@
                 <nav class="flex flex-wrap items-center justify-center gap-4 text-slate-600 dark:text-slate-400">
                     <a href="index.html"
                         class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Home</a>
-                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
-                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">About</a>
-                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
-                    <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Archive</a>
-                    <span class="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
-                 <!--   <a href="rss.xml" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">RSS -->
-                        Feed</a>
                 </nav>
 
                 <div class="flex items-center justify-center gap-4 text-slate-500">
