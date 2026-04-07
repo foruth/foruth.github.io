@@ -3,9 +3,23 @@
   
   <url>
     <loc>https://foruth.github.io/</loc>
-    <lastmod>2025-12-10</lastmod>
+    <lastmod>2026-04-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://foruth.github.io/posts/An%20AI%20Just%20Wrote%20a%20Real%20Browser%20Exploit.html</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://foruth.github.io/posts/The%20Script%20A%20Minimalist%20Upload%20%2B%20Download%20Server.html</loc>
+    <lastmod>2025-12-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   
   <url>

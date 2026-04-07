@@ -389,6 +389,18 @@
         // Pre-defined posts for static search (works on all pages)
         posts: [
             {
+                title: 'An AI Just Wrote a Real Browser Exploit — And That\'s a Wake-Up Call for All of Us',
+                url: 'posts/An AI Just Wrote a Real Browser Exploit.html',
+                excerpt: 'For the first time, Claude independently figured out how to hack Firefox. Here\'s what happened, what it means, and why you should care.',
+                tags: ['AI Security', 'Browser Exploit', 'LLMs']
+            },
+            {
+                title: 'A Minimalist Upload + Download Server: \'python3 upload_server.py\'',
+                url: 'posts/The Script A Minimalist Upload + Download Server.html',
+                excerpt: 'Everyone knows how to download files using `python3 -m http.server 8000`. It’s incredibly simple no extra setup, no hassle.But uploading? Oh, that’s where things suddenly get awkward.',
+                tags: ['Windows Security', 'Privilege Escalation']
+            },
+            {
                 title: 'Windows Privilege Escalation via Weak Service Permissions',
                 url: 'posts/Windows Privilege Escalation Weak Service Permissions.html',
                 excerpt: 'Exploiting weak ACLs and service permissions to escalate from standard user to SYSTEM on Windows.',
@@ -537,7 +549,6 @@
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                     </svg>
-                    <span>Copy</span>
                 `;
 
                 btn.addEventListener('click', async () => {
@@ -560,10 +571,8 @@
 
                     // Show Copied! state
                     btn.classList.add('copied');
-                    btn.querySelector('span').textContent = 'Copied!';
                     setTimeout(() => {
                         btn.classList.remove('copied');
-                        btn.querySelector('span').textContent = 'Copy';
                     }, 2000);
                 });
 
